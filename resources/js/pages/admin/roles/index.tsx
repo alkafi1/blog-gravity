@@ -16,6 +16,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { useCan } from '@/hooks/use-can';
 
 interface Role {
     id: string;
@@ -37,6 +38,10 @@ export default function Index({ roles }: Props) {
     const { flash } = usePage<SharedData>().props;
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [selectedRole, setSelectedRole] = useState<Role | null>(null);
+
+    const canCreate = useCan('roles.create');
+    const canUpdate = useCan('roles.update');
+    const canDelete = useCan('roles.delete');
 
     useEffect(() => {
         if (flash.success) {
@@ -65,7 +70,7 @@ export default function Index({ roles }: Props) {
             header: 'Name',
             accessorKey: 'name',
             sortable: true,
-            cell: (row) => (
+            cell: (row: Role) => (
                 <div className="flex items-center gap-2">
                     <Shield className="h-4 w-4 text-blue-600" />
                     <span className="font-bold">{row.name}</span>
@@ -76,41 +81,45 @@ export default function Index({ roles }: Props) {
             header: 'Slug',
             accessorKey: 'slug',
             sortable: true,
-            cell: (row) => <span className="text-sm font-mono opacity-60">{row.slug}</span>
+            cell: (row: Role) => <span className="text-sm font-mono opacity-60">{row.slug}</span>
         },
         {
             header: 'Description',
             accessorKey: 'description',
-            cell: (row) => <span className="text-sm opacity-80">{row.description}</span>
+            cell: (row: Role) => <span className="text-sm opacity-80">{row.description}</span>
         },
         {
             header: 'Actions',
             accessorKey: 'id',
             align: 'center',
-            cell: (row) => (
+            cell: (row: Role) => (
                 <div className="flex items-center gap-2">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50"
-                        asChild
-                    >
-                        <Link href={`/admin/roles/${row.id}/edit`}>
-                            <Pencil className="h-4 w-4" />
-                        </Link>
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
-                        onClick={() => openDeleteDialog(row)}
-                    >
-                        <Trash2 className="h-4 w-4" />
-                    </Button>
+                    {canUpdate && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+                            asChild
+                        >
+                            <Link href={`/admin/roles/${row.id}/edit`}>
+                                <Pencil className="h-4 w-4" />
+                            </Link>
+                        </Button>
+                    )}
+                    {canDelete && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                            onClick={() => openDeleteDialog(row)}
+                        >
+                            <Trash2 className="h-4 w-4" />
+                        </Button>
+                    )}
                 </div>
             )
         }
-    ];
+    ].filter(col => col.header !== 'Actions' || (canUpdate || canDelete));
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -122,12 +131,14 @@ export default function Index({ roles }: Props) {
                         <h1 className="text-2xl font-bold tracking-tight">Roles & Permissions</h1>
                         <p className="text-sm text-muted-foreground">Manage access levels and their associated permissions.</p>
                     </div>
-                    <Button asChild className="gap-2">
-                        <Link href="/admin/roles/create">
-                            <ShieldPlus className="h-4 w-4" />
-                            Create Role
-                        </Link>
-                    </Button>
+                    {canCreate && (
+                        <Button asChild className="gap-2">
+                            <Link href="/admin/roles/create">
+                                <ShieldPlus className="h-4 w-4" />
+                                Create Role
+                            </Link>
+                        </Button>
+                    )}
                 </div>
 
                 <div className="grid gap-4">

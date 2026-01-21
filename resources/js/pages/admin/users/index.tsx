@@ -16,6 +16,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { useCan } from '@/hooks/use-can';
 
 interface Role {
     id: string;
@@ -42,6 +43,10 @@ export default function Index({ users }: Props) {
     const { flash } = usePage<SharedData>().props;
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
+
+    const canCreate = useCan('users.create');
+    const canUpdate = useCan('users.update');
+    const canDelete = useCan('users.delete');
 
     useEffect(() => {
         if (flash.success) {
@@ -70,7 +75,7 @@ export default function Index({ users }: Props) {
             header: 'Name',
             accessorKey: 'name',
             sortable: true,
-            cell: (row) => (
+            cell: (row: User) => (
                 <div className="flex flex-col">
                     <span className="font-bold">{row.name}</span>
                     <span className="text-xs text-muted-foreground">{row.email}</span>
@@ -80,7 +85,7 @@ export default function Index({ users }: Props) {
         {
             header: 'Roles',
             accessorKey: 'roles',
-            cell: (row) => (
+            cell: (row: User) => (
                 <div className="flex flex-wrap gap-1">
                     {row.roles.map((role) => (
                         <span key={role.id} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] uppercase font-bold">
@@ -95,30 +100,34 @@ export default function Index({ users }: Props) {
             header: 'Actions',
             accessorKey: 'id',
             align: 'center',
-            cell: (row) => (
+            cell: (row: User) => (
                 <div className="flex items-center gap-2">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50"
-                        asChild
-                    >
-                        <Link href={`/admin/users/${row.id}/edit`}>
-                            <Pencil className="h-4 w-4" />
-                        </Link>
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
-                        onClick={() => openDeleteDialog(row)}
-                    >
-                        <Trash2 className="h-4 w-4" />
-                    </Button>
+                    {canUpdate && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+                            asChild
+                        >
+                            <Link href={`/admin/users/${row.id}/edit`}>
+                                <Pencil className="h-4 w-4" />
+                            </Link>
+                        </Button>
+                    )}
+                    {canDelete && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                            onClick={() => openDeleteDialog(row)}
+                        >
+                            <Trash2 className="h-4 w-4" />
+                        </Button>
+                    )}
                 </div>
             )
         }
-    ];
+    ].filter(col => col.header !== 'Actions' || (canUpdate || canDelete));
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -130,12 +139,14 @@ export default function Index({ users }: Props) {
                         <h1 className="text-2xl font-bold tracking-tight">Users</h1>
                         <p className="text-sm text-muted-foreground">Manage administrative users and their roles.</p>
                     </div>
-                    <Button asChild className="gap-2">
-                        <Link href="/admin/users/create">
-                            <UserPlus className="h-4 w-4" />
-                            Create User
-                        </Link>
-                    </Button>
+                    {canCreate && (
+                        <Button asChild className="gap-2">
+                            <Link href="/admin/users/create">
+                                <UserPlus className="h-4 w-4" />
+                                Create User
+                            </Link>
+                        </Button>
+                    )}
                 </div>
 
                 <div className="grid gap-4">

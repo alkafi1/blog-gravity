@@ -1,4 +1,4 @@
-import { Head, Link, useForm, router, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -18,6 +18,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { useCan } from '@/hooks/use-can';
 
 interface Category {
     id: string;
@@ -40,6 +41,10 @@ export default function Index({ categories }: Props) {
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+
+    const canCreate = useCan('categories.create');
+    const canUpdate = useCan('categories.update');
+    const canDelete = useCan('categories.delete');
 
     useEffect(() => {
         if (flash.success) {
@@ -83,19 +88,19 @@ export default function Index({ categories }: Props) {
             header: 'Name',
             accessorKey: 'name',
             sortable: true,
-            cell: (row) => <span className="font-bold">{row.name}</span>
+            cell: (row: Category) => <span className="font-bold">{row.name}</span>
         },
         {
             header: 'Slug',
             accessorKey: 'slug',
             sortable: true,
-            cell: (row) => <span className="text-sm font-mono opacity-60">{row.slug}</span>
+            cell: (row: Category) => <span className="text-sm font-mono opacity-60">{row.slug}</span>
         },
         {
             header: 'Actions',
             accessorKey: 'id',
             align: 'center',
-            cell: (row) => (
+            cell: (row: Category) => (
                 <div className="flex items-center gap-2">
                     <Button
                         variant="ghost"
@@ -105,26 +110,30 @@ export default function Index({ categories }: Props) {
                     >
                         <Eye className="h-4 w-4" />
                     </Button>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50"
-                        onClick={() => openEditModal(row)}
-                    >
-                        <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
-                        onClick={() => openDeleteDialog(row)}
-                    >
-                        <Trash2 className="h-4 w-4" />
-                    </Button>
+                    {canUpdate && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+                            onClick={() => openEditModal(row)}
+                        >
+                            <Pencil className="h-4 w-4" />
+                        </Button>
+                    )}
+                    {canDelete && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                            onClick={() => openDeleteDialog(row)}
+                        >
+                            <Trash2 className="h-4 w-4" />
+                        </Button>
+                    )}
                 </div>
             )
         }
-    ];
+    ].filter(col => col.header !== 'Actions' || (canUpdate || canDelete));
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -136,9 +145,11 @@ export default function Index({ categories }: Props) {
                         <h1 className="text-2xl font-bold tracking-tight">Categories</h1>
                         <p className="text-sm text-muted-foreground">Manage your blog categories here.</p>
                     </div>
-                    <Button onClick={openCreateModal}>
-                        Create Category
-                    </Button>
+                    {canCreate && (
+                        <Button onClick={openCreateModal}>
+                            Create Category
+                        </Button>
+                    )}
                 </div>
 
                 <div className="grid gap-4">

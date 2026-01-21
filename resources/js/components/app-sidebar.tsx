@@ -27,21 +27,25 @@ const mainNavItems: NavItem[] = [
         title: 'Users',
         href: '/admin/users',
         icon: Users,
+        permission: 'users.view',
     },
     {
         title: 'Roles',
         href: '/admin/roles',
         icon: ShieldCheck,
+        permission: 'roles.view',
     },
     {
         title: 'Categories',
         href: '/admin/categories',
         icon: FolderTree,
+        permission: 'categories.view',
     },
     {
         title: 'Posts',
         href: '/admin/posts',
         icon: FileText,
+        permission: 'posts.view',
     },
 ];
 
