@@ -14,8 +14,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 'categories' => \Modules\Category\Models\Category::count(),
                 'posts' => [
                     'total' => \Modules\Post\Models\Post::count(),
-                    'published' => \Modules\Post\Models\Post::where('is_published', true)->count(),
-                    'drafts' => \Modules\Post\Models\Post::where('is_published', false)->count(),
+                    'published' => \Modules\Post\Models\Post::where('status', 'published')->count(),
+                    'drafts' => \Modules\Post\Models\Post::where('status', 'draft')->count(),
                 ]
             ]
         ]);
