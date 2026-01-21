@@ -37,13 +37,11 @@ class UserController extends AdminResourceController
 
     public function store(StoreUserRequest $request)
     {
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+        $user = User::create($request->validated());
 
-        $user->roles()->sync($request->roles);
+        if ($request->has('roles')) {
+            $user->roles()->sync($request->roles);
+        }
 
         return redirect()->route('admin.users.index')->with('success', 'User created successfully.');
     }
@@ -60,18 +58,17 @@ class UserController extends AdminResourceController
 
     public function update(UpdateUserRequest $request, User $user)
     {
-        $user->update([
-            'name' => $request->name,
-            'email' => $request->email,
-        ]);
+        $validated = $request->validated();
 
-        if ($request->password) {
-            $user->update([
-                'password' => Hash::make($request->password),
-            ]);
+        if (empty($validated['password'])) {
+            unset($validated['password']);
         }
 
-        $user->roles()->sync($request->roles);
+        $user->update($validated);
+
+        if ($request->has('roles')) {
+            $user->roles()->sync($request->roles);
+        }
 
         return redirect()->route('admin.users.index')->with('success', 'User updated successfully.');
     }

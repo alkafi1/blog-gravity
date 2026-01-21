@@ -19,7 +19,9 @@ class RoleResource extends JsonResource
             'name' => $this->name,
             'slug' => $this->slug,
             'description' => $this->description,
-            'permissions' => $this->whenLoaded('permissions'), // Assuming PermissionResource isn't strictly needed if just returning collection/array
+            'permissions' => $this->whenLoaded('permissions', function() {
+                return $this->permissions; // Array of Permission objects (or a Resource if needed)
+            }),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

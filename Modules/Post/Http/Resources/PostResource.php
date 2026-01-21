@@ -28,9 +28,13 @@ class PostResource extends JsonResource
             'share_image' => $this->share_image,
             'published_at' => $this->published_at,
             'category_id' => $this->category_id,
-            'category' => new CategoryResource($this->whenLoaded('category')),
+            'category' => $this->whenLoaded('category', function() {
+                return (new CategoryResource($this->category))->resolve();
+            }),
             'user_id' => $this->user_id,
-            'user' => new UserResource($this->whenLoaded('user')),
+            'user' => $this->whenLoaded('user', function() {
+                return (new UserResource($this->user))->resolve();
+            }),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
