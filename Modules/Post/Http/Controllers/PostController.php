@@ -11,11 +11,17 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Auth;
 
-class PostController extends Controller
+use App\Http\Controllers\AdminResourceController;
+
+class PostController extends AdminResourceController
 {
+    public function __construct()
+    {
+        $this->authorizeResource(Post::class, 'post');
+    }
+
     public function index()
     {
-        Gate::authorize('viewAny', Post::class);
         $posts = Post::with(['category', 'user'])->latest()->get();
         return Inertia::render('admin/posts/index', [
             'posts' => $posts
@@ -24,7 +30,6 @@ class PostController extends Controller
 
     public function create()
     {
-        Gate::authorize('create', Post::class);
         $categories = Category::all();
         return Inertia::render('admin/posts/create', [
             'categories' => $categories
@@ -33,7 +38,6 @@ class PostController extends Controller
 
     public function store(Request $request)
     {
-        Gate::authorize('create', Post::class);
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'slug' => 'required|string|unique:posts,slug',
@@ -80,7 +84,6 @@ class PostController extends Controller
 
     public function edit(Post $post)
     {
-        Gate::authorize('update', $post);
         $categories = Category::all();
         return Inertia::render('admin/posts/edit', [
             'post' => $post,
@@ -90,7 +93,6 @@ class PostController extends Controller
 
     public function update(Request $request, Post $post)
     {
-        Gate::authorize('update', $post);
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'slug' => 'required|string|unique:posts,slug,' . $post->id,
@@ -139,7 +141,6 @@ class PostController extends Controller
 
     public function destroy(Post $post)
     {
-        Gate::authorize('delete', $post);
         $post->delete();
         return redirect()->back()->with('success', 'Post deleted successfully.');
     }
