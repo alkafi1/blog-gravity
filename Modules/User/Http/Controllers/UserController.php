@@ -2,16 +2,21 @@
 
 namespace Modules\User\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Controllers\AdminResourceController;
+use Modules\User\Http\Requests\StoreUserRequest;
+use Modules\User\Http\Requests\UpdateUserRequest;
 use Modules\User\Models\User;
 use Modules\Role\Models\Role;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules;
 
-class UserController extends Controller
+class UserController extends AdminResourceController
 {
+    public function __construct()
+    {
+        $this->authorizeResource(User::class, 'user');
+    }
+
     public function index()
     {
         $users = User::with('roles')->latest()->get();
@@ -28,16 +33,8 @@ class UserController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreUserRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'roles' => 'required|array|min:1',
-            'roles.*' => 'exists:roles,id',
-        ]);
-
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -59,16 +56,8 @@ class UserController extends Controller
         ]);
     }
 
-    public function update(Request $request, User $user)
+    public function update(UpdateUserRequest $request, User $user)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
-            'roles' => 'required|array|min:1',
-            'roles.*' => 'exists:roles,id',
-        ]);
-
         $user->update([
             'name' => $request->name,
             'email' => $request->email,

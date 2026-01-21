@@ -2,13 +2,19 @@
 
 namespace Modules\Category\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Controllers\AdminResourceController;
+use Modules\Category\Http\Requests\StoreCategoryRequest;
+use Modules\Category\Http\Requests\UpdateCategoryRequest;
 use Modules\Category\Models\Category;
 use Inertia\Inertia;
 
-class CategoryController extends Controller
+class CategoryController extends AdminResourceController
 {
+    public function __construct()
+    {
+        $this->authorizeResource(Category::class, 'category');
+    }
+
     public function index()
     {
         $categories = Category::latest()->get();
@@ -18,26 +24,16 @@ class CategoryController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreCategoryRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'slug' => 'required|string|unique:categories,slug',
-        ]);
-
-        Category::create($validated);
+        Category::create($request->validated());
 
         return redirect()->back()->with('success', 'Category created successfully.');
     }
 
-    public function update(Request $request, Category $category)
+    public function update(UpdateCategoryRequest $request, Category $category)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'slug' => 'required|string|unique:categories,slug,' . $category->id,
-        ]);
-
-        $category->update($validated);
+        $category->update($request->validated());
 
         return redirect()->back()->with('success', 'Category updated successfully.');
     }
