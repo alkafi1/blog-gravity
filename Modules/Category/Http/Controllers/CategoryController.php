@@ -12,7 +12,7 @@ class CategoryController extends AdminResourceController
 {
     public function __construct()
     {
-        $this->authorizeResource(Category::class, 'category');
+        // $this->authorizeResource(Category::class, 'category');
     }
 
     public function index()
