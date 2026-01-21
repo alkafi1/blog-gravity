@@ -5,25 +5,25 @@ A modern, full-stack blog platform built with Laravel 12, React 19, and Inertia.
 ## 🚀 Features
 
 ### Core Functionality
-- **📝 Post Management**: Create, edit, publish, and delete blog posts with multiple layout options
-- **📂 Category System**: Organize posts with hierarchical categories
-- **👥 User Management**: Complete user authentication and profile management
-- **🔐 Role-Based Access Control**: Granular permissions system with 4 default roles
-- **📊 Dashboard**: Real-time statistics and analytics
-- **🎨 Multiple Post Layouts**: 5 different post layout options for visual variety
+- **📊 Advanced DataTables**: Powerful table component with column alignment (left/center/right), dynamic column visibility toggling, and instant data refresh.
+- **📝 Post Management**: Create, edit, publish, and delete blog posts with 5 different aesthetic layout options.
+- **📂 Category System**: Organize posts with hierarchical categories.
+- **👥 Enhanced User Profiles**: Complete user management including profile images, phone number support, and roles.
+- **🔐 Role-Based Access Control**: Granular permissions system with fine-grained policies for every module.
+- **📈 Dashboard**: Real-time statistics and analytics for platform health.
 
-### Authentication & Authorization
-- **Secure Authentication**: Powered by Laravel Fortify
-- **Role System**: Super Admin, Admin, Editor, and Writer roles
-- **Permission Groups**: Fine-grained permissions for users, categories, posts, and roles
-- **Centralized RBAC Config**: Easy-to-manage role and permission configuration
+### Architecture & API
+- **✨ Standardized Controllers**: All admin resources use a unified `AdminResourceController` for consistent CRUD behavior and authorization.
+- **📦 API Resources**: Clean data transformation using Laravel API Resources for perfect frontend-backend synchronization.
+- **🛡️ Module-Level Policies**: Dedicated policies per module ensuring strict data isolation and security.
+- **🔗 Wayfinder Integration**: Automatically generated TypeScript types for routes, actions, and layouts for ultimate type-safety.
 
 ### Developer Experience
-- **Modular Architecture**: Clean separation of concerns with Laravel modules
-- **Type Safety**: Full TypeScript support
-- **Modern Tooling**: ESLint, Prettier, and Laravel Pint for code quality
-- **Hot Module Replacement**: Fast development with Vite
-- **Testing Suite**: PestPHP for comprehensive testing
+- **Modular Architecture**: Clean separation of concerns with Laravel modules for Users, Posts, Roles, and Categories.
+- **Type Safety**: Full TypeScript support across the entire frontend.
+- **Modern Tooling**: ESLint, Prettier, and Laravel Pint for high code quality.
+- **Hot Module Replacement**: Fast development loops with Vite.
+- **Testing Suite**: PestPHP for comprehensive unit and feature testing.
 
 ## 🛠️ Tech Stack
 
