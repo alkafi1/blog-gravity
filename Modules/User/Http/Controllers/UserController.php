@@ -10,6 +10,8 @@ use Modules\Role\Models\Role;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Hash;
 
+use Modules\User\Http\Resources\UserResource;
+
 class UserController extends AdminResourceController
 {
     public function __construct()
@@ -21,7 +23,7 @@ class UserController extends AdminResourceController
     {
         $users = User::with('roles')->latest()->get();
         return Inertia::render('admin/users/index', [
-            'users' => $users
+            'users' => UserResource::collection($users)->resolve()
         ]);
     }
 
@@ -51,7 +53,7 @@ class UserController extends AdminResourceController
         $user->load('roles');
         $roles = Role::all();
         return Inertia::render('admin/users/edit', [
-            'user' => $user,
+            'user' => (new UserResource($user))->resolve(),
             'roles' => $roles
         ]);
     }

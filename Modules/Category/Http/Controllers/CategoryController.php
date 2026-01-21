@@ -8,6 +8,8 @@ use Modules\Category\Http\Requests\UpdateCategoryRequest;
 use Modules\Category\Models\Category;
 use Inertia\Inertia;
 
+use Modules\Category\Http\Resources\CategoryResource;
+
 class CategoryController extends AdminResourceController
 {
     public function __construct()
@@ -20,7 +22,7 @@ class CategoryController extends AdminResourceController
         $categories = Category::latest()->get();
 
         return Inertia::render('admin/categories/index', [
-            'categories' => $categories,
+            'categories' => CategoryResource::collection($categories)->resolve(),
         ]);
     }
 

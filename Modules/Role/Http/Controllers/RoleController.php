@@ -9,6 +9,8 @@ use Modules\Role\Models\Role;
 use Modules\Role\Models\Permission;
 use Inertia\Inertia;
 
+use Modules\Role\Http\Resources\RoleResource;
+
 class RoleController extends AdminResourceController
 {
     public function __construct()
@@ -20,7 +22,7 @@ class RoleController extends AdminResourceController
     {
         $roles = Role::with('permissions')->get();
         return Inertia::render('admin/roles/index', [
-            'roles' => $roles
+            'roles' => RoleResource::collection($roles)->resolve()
         ]);
     }
 
@@ -48,7 +50,7 @@ class RoleController extends AdminResourceController
         $permissionsByGroup = Permission::all()->groupBy('group');
 
         return Inertia::render('admin/roles/edit', [
-            'role' => $role,
+            'role' => (new RoleResource($role))->resolve(),
             'permissionsByGroup' => $permissionsByGroup
         ]);
     }

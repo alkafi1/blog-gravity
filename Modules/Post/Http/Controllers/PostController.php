@@ -12,6 +12,8 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Auth;
 
+use Modules\Post\Http\Resources\PostResource;
+
 class PostController extends AdminResourceController
 {
     public function __construct()
@@ -23,7 +25,7 @@ class PostController extends AdminResourceController
     {
         $posts = Post::with(['category', 'user'])->latest()->get();
         return Inertia::render('admin/posts/index', [
-            'posts' => $posts
+            'posts' => PostResource::collection($posts)->resolve()
         ]);
     }
 
@@ -71,7 +73,7 @@ class PostController extends AdminResourceController
     {
         $categories = Category::all();
         return Inertia::render('admin/posts/edit', [
-            'post' => $post,
+            'post' => (new PostResource($post))->resolve(),
             'categories' => $categories
         ]);
     }
