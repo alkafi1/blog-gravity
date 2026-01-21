@@ -31,13 +31,8 @@ class SyncRolesPermissions extends Command
         $this->info('Syncing Roles and Permissions...');
 
         DB::transaction(function () {
-            // Define Permissions
-            $groups = [
-                'users' => ['view', 'create', 'update', 'delete'],
-                'categories' => ['view', 'create', 'update', 'delete'],
-                'posts' => ['view', 'create', 'update', 'update.all', 'delete', 'delete.all', 'publish'],
-                'roles' => ['view', 'create', 'update', 'delete'],
-            ];
+            // Get permission groups from config
+            $groups = config('rbac.permission_groups', []);
 
             $allPermissions = [];
 
@@ -52,34 +47,8 @@ class SyncRolesPermissions extends Command
                 }
             }
 
-            // Define Roles
-            $roles = [
-                'super-admin' => [
-                    'label' => 'Super Admin',
-                    'permissions' => array_keys($allPermissions), // All permissions
-                ],
-                'admin' => [
-                    'label' => 'Administrator',
-                    'permissions' => [
-                        'users.view', 'users.create', 'users.update',
-                        'categories.view', 'categories.create', 'categories.update', 'categories.delete',
-                        'posts.view', 'posts.create', 'posts.update.all', 'posts.delete.all', 'posts.publish',
-                    ],
-                ],
-                'editor' => [
-                    'label' => 'Editor',
-                    'permissions' => [
-                        'categories.view',
-                        'posts.view', 'posts.create', 'posts.update.all', 'posts.delete.all', 'posts.publish',
-                    ],
-                ],
-                'writer' => [
-                    'label' => 'Writer',
-                    'permissions' => [
-                        'posts.view', 'posts.create', 'posts.update', 'posts.delete',
-                    ],
-                ],
-            ];
+            // Get roles from config
+            $roles = config('rbac.roles', []);
 
             foreach ($roles as $slug => $details) {
                 $role = Role::firstOrCreate(
@@ -89,11 +58,18 @@ class SyncRolesPermissions extends Command
 
                 // Sync Permissions
                 $permissionIds = [];
-                foreach ($details['permissions'] as $permName) {
-                    if (isset($allPermissions[$permName])) {
-                        $permissionIds[] = $allPermissions[$permName]->id;
+
+                // Handle special case: '*' means all permissions
+                if ($details['permissions'] === '*') {
+                    $permissionIds = array_column($allPermissions, 'id');
+                } else {
+                    foreach ($details['permissions'] as $permName) {
+                        if (isset($allPermissions[$permName])) {
+                            $permissionIds[] = $allPermissions[$permName]->id;
+                        }
                     }
                 }
+
                 $role->permissions()->sync($permissionIds);
             }
         });
