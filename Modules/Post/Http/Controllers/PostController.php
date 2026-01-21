@@ -52,17 +52,17 @@ class PostController extends Controller
 
         if ($request->hasFile('featured_image')) {
             $path = $request->file('featured_image')->store('posts', 'public');
-            $validated['featured_image'] = '/storage/' . $path;
+            $validated['featured_image'] = $path;
         }
 
         if ($request->hasFile('thumbnail_image')) {
             $path = $request->file('thumbnail_image')->store('posts/thumbs', 'public');
-            $validated['thumbnail_image'] = '/storage/' . $path;
+            $validated['thumbnail_image'] = $path;
         }
 
         if ($request->hasFile('share_image')) {
             $path = $request->file('share_image')->store('posts/shares', 'public');
-            $validated['share_image'] = '/storage/' . $path;
+            $validated['share_image'] = $path;
         }
 
         $validated['user_id'] = Auth::id();
@@ -110,19 +110,19 @@ class PostController extends Controller
         if ($request->hasFile('featured_image')) {
             $request->validate(['featured_image' => 'image|max:2048']);
             $path = $request->file('featured_image')->store('posts', 'public');
-            $validated['featured_image'] = '/storage/' . $path;
+            $validated['featured_image'] = $path;
         }
 
         if ($request->hasFile('thumbnail_image')) {
             $request->validate(['thumbnail_image' => 'image|max:1024']);
             $path = $request->file('thumbnail_image')->store('posts/thumbs', 'public');
-            $validated['thumbnail_image'] = '/storage/' . $path;
+            $validated['thumbnail_image'] = $path;
         }
 
         if ($request->hasFile('share_image')) {
             $request->validate(['share_image' => 'image|max:1536']);
             $path = $request->file('share_image')->store('posts/shares', 'public');
-            $validated['share_image'] = '/storage/' . $path;
+            $validated['share_image'] = $path;
         }
 
         if ($request->status === 'published') {

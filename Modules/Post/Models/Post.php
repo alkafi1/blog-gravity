@@ -47,4 +47,30 @@ class Post extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    protected function featuredImage(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            get: function (?string $value) {
+                if (!$value) return null;
+                if (filter_var($value, FILTER_VALIDATE_URL) || str_starts_with($value, '/storage/')) {
+                    return $value;
+                }
+                return \Illuminate\Support\Facades\Storage::url($value);
+            },
+        );
+    }
+
+    protected function thumbnailImage(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            get: function (?string $value) {
+                if (!$value) return null;
+                if (filter_var($value, FILTER_VALIDATE_URL) || str_starts_with($value, '/storage/')) {
+                    return $value;
+                }
+                return \Illuminate\Support\Facades\Storage::url($value);
+            },
+        );
+    }
 }
