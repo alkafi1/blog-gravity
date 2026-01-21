@@ -11,6 +11,12 @@ use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Gate;
 use Modules\Post\Models\Post;
 use Modules\Post\Policies\PostPolicy;
+use Modules\Category\Models\Category;
+use Modules\Category\Policies\CategoryPolicy;
+use Modules\Role\Models\Role;
+use Modules\Role\Policies\RolePolicy;
+use Modules\User\Models\User;
+use Modules\User\Policies\UserPolicy;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -29,6 +35,9 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
         Gate::policy(Post::class, PostPolicy::class);
+        Gate::policy(Category::class, CategoryPolicy::class);
+        Gate::policy(Role::class, RolePolicy::class);
+        Gate::policy(User::class, UserPolicy::class);
     }
 
     protected function configureDefaults(): void

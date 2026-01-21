@@ -8,5 +8,5 @@ use Illuminate\Routing\Controller as BaseController;
 
 class AdminResourceController extends BaseController
 {
-    use  ValidatesRequests;
+    use AuthorizesRequests, ValidatesRequests;
 }
