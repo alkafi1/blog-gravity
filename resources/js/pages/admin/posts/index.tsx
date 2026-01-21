@@ -89,6 +89,7 @@ export default function Index({ posts }: Props) {
             header: 'Status',
             accessorKey: 'status',
             sortable: true,
+            align: 'center',
             cell: (row) => {
                 const colors: Record<string, string> = {
                     published: 'bg-green-100 text-green-700',
@@ -108,6 +109,7 @@ export default function Index({ posts }: Props) {
             header: 'Stats',
             accessorKey: 'reads',
             sortable: true,
+            align: 'center',
             cell: (row) => (
                 <div className="flex items-center gap-3 text-[10px] font-bold text-muted-foreground uppercase tracking-tighter">
                     <span title="Reads">{row.reads} R</span>
@@ -119,8 +121,9 @@ export default function Index({ posts }: Props) {
         {
             header: 'Actions',
             accessorKey: 'id',
+            align: 'center',
             cell: (row) => (
-                <div className="flex items-center justify-end gap-2">
+                <div className="flex items-center gap-2">
                     <Button
                         variant="ghost"
                         size="icon"

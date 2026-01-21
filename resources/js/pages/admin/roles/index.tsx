@@ -86,8 +86,9 @@ export default function Index({ roles }: Props) {
         {
             header: 'Actions',
             accessorKey: 'id',
+            align: 'center',
             cell: (row) => (
-                <div className="flex items-center justify-end gap-2">
+                <div className="flex items-center gap-2">
                     <Button
                         variant="ghost"
                         size="icon"
