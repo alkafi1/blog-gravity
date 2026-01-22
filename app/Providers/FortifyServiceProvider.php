@@ -60,9 +60,9 @@ class FortifyServiceProvider extends ServiceProvider
             $user = null;
 
             if ($isNumeric) {
-                $user = \Modules\User\Models\User::where('phone', $login)->first();
+                $user = \App\Models\User::where('phone', $login)->first();
             } else {
-                $user = \Modules\User\Models\User::where('email', $login)->first();
+                $user = \App\Models\User::where('email', $login)->first();
             }
 
             // 2. User Not Found Check

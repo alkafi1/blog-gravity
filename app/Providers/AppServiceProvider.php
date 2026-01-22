@@ -9,16 +9,16 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
 use Illuminate\Support\Facades\Gate;
-use Modules\Post\Models\Post;
-use Modules\Post\Policies\PostPolicy;
-use Modules\Category\Models\Category;
-use Modules\Category\Policies\CategoryPolicy;
-use Modules\Role\Models\Role;
-use Modules\Role\Policies\RolePolicy;
-use Modules\User\Models\User;
-use Modules\User\Policies\UserPolicy;
-use Modules\Subcategory\Models\Subcategory;
-use Modules\Subcategory\Policies\SubcategoryPolicy;
+use App\Models\Post;
+use App\Policies\PostPolicy;
+use App\Models\Category;
+use App\Policies\CategoryPolicy;
+use App\Models\Role;
+use App\Policies\RolePolicy;
+use App\Models\User;
+use App\Policies\UserPolicy;
+use App\Models\Subcategory;
+use App\Policies\SubcategoryPolicy;
 
 class AppServiceProvider extends ServiceProvider
 {
