@@ -15,40 +15,87 @@ class PostSeeder extends Seeder
      */
     public function run(): void
     {
-        $categories = Category::all();
         $user = User::first();
-
         if (!$user) {
             $user = User::factory()->create();
         }
 
         $statuses = ['published', 'draft', 'rejected', 'pending', 'watch'];
 
-        foreach ($categories as $category) {
-            for ($i = 1; $i <= 5; $i++) {
-                $content = "Explore the future of {$category->name} with our in-depth analysis of article layout {$i}. In today's rapidly evolving digital landscape, understanding the nuances of content presentation is crucial for creators and publishers alike. This comprehensive guide delves into best practices, design principles, and strategic implementation to help you craft compelling narratives that resonate with your audience. We'll examine historical trends, current innovations, and future projections to provide a holistic view of the industry. From typography choices to layout structures, every element plays a pivotal role in user engagement and information retention. Join us as we uncover the secrets behind high-performing articles and discover how you can leverage these insights to elevate your own content strategy. This article is designed to be informative, engaging, and practically applicable for professionals across various domains. Whether you're a seasoned journalist or an aspiring blogger, there's always something new to learn in the world of digital publishing. Let's embark on this journey together and redefine the standards of excellence in communication.";
+        $techArticles = [
+            'Artificial Intelligence' => [
+                'Machine Learning' => [
+                    'The Future of Machine Learning in Healthcare',
+                    'Building Your First Neural Network with Python',
+                    'Advanced Algorithms for Predictive Analytics',
+                ],
+                'Generative AI' => [
+                    'Generative AI: Revolutionizing Creative Content',
+                    'The Ethics of Large Language Models',
+                    'Designing Prompts for Better AI Interactions',
+                ],
+            ],
+            'Web Development' => [
+                'React' => [
+                    'Mastering React Server Components',
+                    'State Management Patterns in Modern React',
+                    'Performance Tuning Your React Application',
+                ],
+                'Laravel' => [
+                    'Laravel 11: What is New and Improved',
+                    'Building Robust REST APIs with Laravel',
+                    'Scalable Architecture Patterns in PHP',
+                ],
+            ],
+            'DevOps & Infrastructure' => [
+                'Kubernetes' => [
+                    'Scaling Microservices with Kubernetes',
+                    'Best Practices for K8s Security',
+                    'Monitoring Cloud-Native Applications',
+                ],
+                'Docker' => [
+                    'Containerization Strategies for Enterprise',
+                    'Optimizing Docker Images for Speed',
+                    'Multi-stage Builds: A Deep Dive',
+                ],
+            ],
+        ];
 
-                // Ensure more than 150 words
-                $content .= " " . str_repeat("Additional context and detailed explanation to ensure the word count requirement is met comfortably. ", 8);
+        foreach ($techArticles as $catName => $subs) {
+            $category = Category::where('name', $catName)->first();
+            if (!$category) continue;
 
-                $status = $statuses[array_rand($statuses)];
+            foreach ($subs as $subName => $titles) {
+                $subcat = \Modules\Subcategory\Models\Subcategory::where('name', $subName)->first();
 
-                Post::create([
-                    'title' => "{$category->name} - Article Layout {$i}",
-                    'slug' => Str::slug("{$category->name} Article Layout {$i} " . uniqid()),
-                    'content' => $content,
-                    'category_id' => $category->id,
-                    'user_id' => $user->id,
-                    'layout_type' => $i,
-                    'featured_image' => "https://images.unsplash.com/photo-" . (1500000000000 + rand(100000, 999999)) . "?auto=format&fit=crop&q=80&w=1200",
-                    'thumbnail_image' => "https://images.unsplash.com/photo-" . (1500000000000 + rand(100000, 999999)) . "?auto=format&fit=crop&q=80&w=400",
-                    'share_image' => "https://images.unsplash.com/photo-" . (1500000000000 + rand(100000, 999999)) . "?auto=format&fit=crop&q=80&w=1200&h=630",
-                    'status' => $status,
-                    'shares' => rand(0, 500),
-                    'likes' => rand(0, 1000),
-                    'reads' => rand(100, 5000),
-                    'published_at' => $status === 'published' ? now() : null,
-                ]);
+                foreach ($titles as $index => $title) {
+                    $layout = ($index % 5) + 1;
+                    $status = $statuses[array_rand($statuses)];
+
+                    $content = "## {$title}\n\n" .
+                    "Exploring the depths of modern technology requires a strategic approach to understanding and implementation. In this detailed guide, we dive into the core concepts, practical applications, and future trends that are shaping our industry today. From initial architecture to final optimization, every step is critical for success in the fast-paced world of digital evolution.\n\n" .
+                    "We'll cover the latest best practices, common pitfalls to avoid, and expert recommendations based on years of industry experience. Whether you're working on enterprise-scale solutions or innovative startup projects, these insights will help you navigate the complex terrain of current technological advancements. Our focus is on providing clear, actionable information that you can immediately apply to your work, ensuring that your projects are not only functional but also scalable and secure.\n\n" .
+                    "Additionally, we'll examine real-world use cases, case studies, and comparative analyses to provide a well-rounded perspective. This approach allows readers to see the practical utility of the theories discussed, bridging the gap between abstract concepts and tangible results. Join us on this journey as we explore how these technologies are redefining the standards of excellence in our field and paving the way for a more connected and efficient future.\n\n" .
+                    str_repeat("Detailed analysis and further exploration of technical details to ensure the article provides significant value and meets the required length for high-quality content presentation. ", 12);
+
+                    Post::create([
+                        'title' => $title,
+                        'slug' => Str::slug($title . "-" . uniqid()),
+                        'content' => $content,
+                        'category_id' => $category->id,
+                        'subcategory_id' => $subcat ? $subcat->id : null,
+                        'user_id' => $user->id,
+                        'layout_type' => $layout,
+                        'featured_image' => "https://images.unsplash.com/photo-" . (1500000000000 + rand(100000, 999999)) . "?auto=format&fit=crop&q=80&w=1200",
+                        'thumbnail_image' => "https://images.unsplash.com/photo-" . (1500000000000 + rand(100000, 999999)) . "?auto=format&fit=crop&q=80&w=400",
+                        'share_image' => "https://images.unsplash.com/photo-" . (1500000000000 + rand(100000, 999999)) . "?auto=format&fit=crop&q=80&w=1200&h=630",
+                        'status' => $status,
+                        'shares' => rand(10, 500),
+                        'likes' => rand(20, 1000),
+                        'reads' => rand(100, 5000),
+                        'published_at' => $status === 'published' ? now() : null,
+                    ]);
+                }
             }
         }
     }

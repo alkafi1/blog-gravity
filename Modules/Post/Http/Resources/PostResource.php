@@ -28,13 +28,20 @@ class PostResource extends JsonResource
             'share_image' => $this->share_image,
             'published_at' => $this->published_at,
             'category_id' => $this->category_id,
+            'subcategory_id' => $this->subcategory_id,
             'category' => $this->whenLoaded('category', function() {
-                return (new CategoryResource($this->category))->resolve();
+                return (new \App\Http\Resources\SelectListResource($this->category))->resolve();
+            }),
+            'subcategory' => $this->whenLoaded('subcategory', function() {
+                return (new \App\Http\Resources\SelectListResource($this->subcategory))->resolve();
             }),
             'user_id' => $this->user_id,
             'user' => $this->whenLoaded('user', function() {
                 return (new UserResource($this->user))->resolve();
             }),
+            'shares' => $this->shares,
+            'likes' => $this->likes,
+            'reads' => $this->reads,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

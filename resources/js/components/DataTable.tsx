@@ -44,11 +44,18 @@ export interface Column<T> {
     align?: 'left' | 'center' | 'right';
 }
 
+export interface DataTableFilter {
+    key: string;
+    label: string;
+    options: { label: string; value: string | number }[];
+}
+
 interface DataTableProps<T> {
     data: T[];
     columns: Column<T>[];
-    searchKey?: keyof T | string;
+    searchKey?: keyof T | string | (keyof T | string)[];
     itemsPerPage?: number;
+    filters?: DataTableFilter[];
 }
 
 export function DataTable<T extends { id: number | string }>({
@@ -56,8 +63,10 @@ export function DataTable<T extends { id: number | string }>({
     columns,
     searchKey,
     itemsPerPage = 10,
+    filters = [],
 }: DataTableProps<T>) {
     const [searchQuery, setSearchQuery] = useState('');
+    const [selectedFilters, setSelectedFilters] = useState<Record<string, string | number>>({});
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(itemsPerPage);
     const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>(
@@ -81,23 +90,57 @@ export function DataTable<T extends { id: number | string }>({
         setSortConfig({ key, direction });
     };
 
+    // Helper to get nested value
+    const getNestedValue = (obj: any, path: string) => {
+        return path.split('.').reduce((acc, part) => acc && acc[part], obj);
+    };
+
     // Filter and Sort Data
     const filteredAndSortedData = useMemo(() => {
         let result = [...data];
 
-        // Search
+        // 1. Dynamic Filters
+        Object.entries(selectedFilters).forEach(([key, value]) => {
+            if (value !== '' && value !== undefined && value !== 'all') {
+                result = result.filter(item => {
+                    const itemValue = getNestedValue(item, key);
+                    return String(itemValue) === String(value);
+                });
+            }
+        });
+
+        // 2. Search
         if (searchQuery && searchKey) {
+            const searchKeys = Array.isArray(searchKey) ? searchKey : [searchKey];
             result = result.filter((item) => {
-                const value = String(item[searchKey as keyof T] || '').toLowerCase();
-                return value.includes(searchQuery.toLowerCase());
+                return searchKeys.some((key) => {
+                    const value = String(getNestedValue(item, String(key)) || '').toLowerCase();
+                    return value.includes(searchQuery.toLowerCase());
+                });
             });
         }
 
-        // Sort
+        // 3. Sort
         if (sortConfig.key && sortConfig.direction) {
             result.sort((a, b) => {
-                const aValue = String(a[sortConfig.key as keyof T] || '');
-                const bValue = String(b[sortConfig.key as keyof T] || '');
+                let aValue = getNestedValue(a, sortConfig.key);
+                let bValue = getNestedValue(b, sortConfig.key);
+
+                // Handle null/undefined
+                if (aValue === null || aValue === undefined) aValue = '';
+                if (bValue === null || bValue === undefined) bValue = '';
+
+                // Handle numbers vs strings
+                const isNumeric = !isNaN(parseFloat(aValue)) && isFinite(aValue) &&
+                    !isNaN(parseFloat(bValue)) && isFinite(bValue);
+
+                if (isNumeric) {
+                    aValue = parseFloat(aValue);
+                    bValue = parseFloat(bValue);
+                } else {
+                    aValue = String(aValue).toLowerCase();
+                    bValue = String(bValue).toLowerCase();
+                }
 
                 if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
                 if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
@@ -106,7 +149,7 @@ export function DataTable<T extends { id: number | string }>({
         }
 
         return result;
-    }, [data, searchQuery, searchKey, sortConfig]);
+    }, [data, searchQuery, searchKey, sortConfig, selectedFilters]);
 
     // Pagination
     const pageCount = Math.ceil(filteredAndSortedData.length / pageSize);
@@ -116,15 +159,15 @@ export function DataTable<T extends { id: number | string }>({
     );
 
     const handleRefresh = () => {
-        router.reload({ preserveScroll: true });
+        router.reload({ preserveScroll: true } as any);
     };
 
     return (
         <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div className="flex flex-1 items-center space-x-2 w-full">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div className="flex flex-1 flex-wrap items-center gap-2 w-full">
                     {searchKey && (
-                        <div className="relative w-full max-w-sm">
+                        <div className="relative w-full max-w-xs">
                             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                             <Input
                                 placeholder="Search..."
@@ -136,6 +179,40 @@ export function DataTable<T extends { id: number | string }>({
                                 className="pl-8 w-full h-9 bg-background"
                             />
                         </div>
+                    )}
+
+                    {filters.map((filter) => (
+                        <Select
+                            key={filter.key}
+                            value={String(selectedFilters[filter.key] || 'all')}
+                            onValueChange={(value) => {
+                                setSelectedFilters(prev => ({ ...prev, [filter.key]: value }));
+                                setCurrentPage(1);
+                            }}
+                        >
+                            <SelectTrigger className="h-9 w-full max-w-[150px] bg-background">
+                                <SelectValue placeholder={filter.label} />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All {filter.label}s</SelectItem>
+                                {filter.options.map((opt) => (
+                                    <SelectItem key={String(opt.value)} value={String(opt.value)}>
+                                        {opt.label}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    ))}
+
+                    {Object.keys(selectedFilters).some(key => selectedFilters[key] !== 'all') && (
+                        <Button
+                            variant="ghost"
+                            onClick={() => setSelectedFilters({})}
+                            className="h-9 px-2 lg:px-3"
+                        >
+                            Reset
+                            <X className="ml-2 h-4 w-4" />
+                        </Button>
                     )}
                 </div>
                 <div className="flex items-center gap-2">

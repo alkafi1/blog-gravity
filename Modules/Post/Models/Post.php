@@ -19,6 +19,7 @@ class Post extends Model
         'slug',
         'content',
         'category_id',
+        'subcategory_id',
         'user_id',
         'layout_type',
         'featured_image',
@@ -44,6 +45,11 @@ class Post extends Model
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function subcategory()
+    {
+        return $this->belongsTo(\Modules\Subcategory\Models\Subcategory::class);
     }
 
     public function user()

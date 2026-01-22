@@ -145,7 +145,7 @@ export default function Index({ roles }: Props) {
                     <DataTable
                         data={roles}
                         columns={columns}
-                        searchKey="name"
+                        searchKey={['name', 'slug', 'description']}
                     />
                 </div>
             </div>

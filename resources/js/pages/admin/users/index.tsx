@@ -4,7 +4,7 @@ import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Button } from '@/components/ui/button';
 import { DataTable, type Column } from '@/components/DataTable';
 import { useEffect, useState } from 'react';
-import { Pencil, Trash2, UserPlus, Shield } from 'lucide-react';
+import { Pencil, Trash2, UserPlus, Shield, X } from 'lucide-react';
 import { toast } from 'sonner';
 import {
     AlertDialog,
@@ -33,6 +33,7 @@ interface User {
 
 interface Props {
     users: User[];
+    roles: Role[];
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -40,7 +41,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Users', href: '/admin/users' },
 ];
 
-export default function Index({ users }: Props) {
+export default function Index({ users, roles }: Props) {
     const { flash } = usePage<SharedData>().props;
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -48,6 +49,14 @@ export default function Index({ users }: Props) {
     const canCreate = useCan('users.create');
     const canUpdate = useCan('users.update');
     const canDelete = useCan('users.delete');
+
+    const filters = [
+        {
+            key: 'roles.0.id', // Simplification: filters by primary role
+            label: 'Role',
+            options: roles.map(r => ({ label: r.name, value: r.id }))
+        }
+    ];
 
     useEffect(() => {
         if (flash.success) {
@@ -155,7 +164,8 @@ export default function Index({ users }: Props) {
                     <DataTable
                         data={users}
                         columns={columns}
-                        searchKey="name"
+                        searchKey={['name', 'email', 'phone']}
+                        filters={filters}
                     />
                 </div>
             </div>

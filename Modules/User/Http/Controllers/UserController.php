@@ -22,8 +22,10 @@ class UserController extends AdminResourceController
     public function index()
     {
         $users = User::with('roles')->latest()->get();
+        $roles = Role::all();
         return Inertia::render('admin/users/index', [
-            'users' => UserResource::collection($users)->resolve()
+            'users' => UserResource::collection($users)->resolve(),
+            'roles' => $roles,
         ]);
     }
 
