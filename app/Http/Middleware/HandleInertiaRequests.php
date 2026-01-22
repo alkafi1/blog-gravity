@@ -51,12 +51,12 @@ class HandleInertiaRequests extends Middleware
                 'error' => $request->session()->get('error'),
             ],
             'stats' => $request->user() ? [
-                'users' => \Modules\User\Models\User::count(),
-                'categories' => \Modules\Category\Models\Category::count(),
+                'users' => \App\Models\User::count(),
+                'categories' => \App\Models\Category::count(),
                 'posts' => [
-                    'total' => \Modules\Post\Models\Post::count(),
-                    'published' => \Modules\Post\Models\Post::where('status', 'published')->count(),
-                    'drafts' => \Modules\Post\Models\Post::where('status', 'draft')->count(),
+                    'total' => \App\Models\Post::count(),
+                    'published' => \App\Models\Post::where('status', 'published')->count(),
+                    'drafts' => \App\Models\Post::where('status', 'draft')->count(),
                 ]
             ] : null,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',

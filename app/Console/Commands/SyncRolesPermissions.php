@@ -3,8 +3,8 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use Modules\Role\Models\Role;
-use Modules\Role\Models\Permission;
+use App\Models\Role;
+use App\Models\Permission;
 use Illuminate\Support\Facades\DB;
 
 class SyncRolesPermissions extends Command
@@ -41,7 +41,11 @@ class SyncRolesPermissions extends Command
                     $name = "{$group}.{$action}";
                     $permission = Permission::firstOrCreate(
                         ['name' => $name],
-                        ['group' => $group, 'description' => "Can {$action} {$group}"]
+                        [
+                            'slug' => $name,
+                            'group' => $group,
+                            'description' => "Can {$action} {$group}"
+                        ]
                     );
                     $allPermissions[$name] = $permission;
                 }

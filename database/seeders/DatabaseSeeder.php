@@ -2,11 +2,9 @@
 
 namespace Database\Seeders;
 
-use Modules\User\Models\User;
+use App\Models\User;
+use App\Models\Role;
 use Illuminate\Database\Seeder;
-use Modules\Role\Database\Seeders\RoleSeeder;
-use Modules\Category\Database\Seeders\CategorySeeder;
-use Modules\Post\Database\Seeders\PostSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -18,7 +16,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RoleSeeder::class,
             CategorySeeder::class,
-            \Modules\Subcategory\Database\Seeders\SubcategorySeeder::class,
+            SubcategorySeeder::class,
         ]);
 
         // Create Super Admin
@@ -28,7 +26,7 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('password'),
         ]);
 
-        $superRole = \Modules\Role\Models\Role::where('slug', 'super-admin')->first();
+        $superRole = Role::where('slug', 'super-admin')->first();
         if ($superRole) {
             $superAdmin->roles()->attach($superRole);
         }
@@ -40,7 +38,7 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('password'),
         ]);
 
-        $adminRole = \Modules\Role\Models\Role::where('slug', 'admin')->first();
+        $adminRole = Role::where('slug', 'admin')->first();
         if ($adminRole) {
             $admin->roles()->attach($adminRole);
         }
