@@ -4,7 +4,7 @@ import { type BreadcrumbItem } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Shield, Mail, User as UserIcon } from 'lucide-react';
+import { Shield, Mail, User as UserIcon, Phone } from 'lucide-react';
 
 interface Role {
     id: string;
@@ -15,6 +15,7 @@ interface User {
     id: string;
     name: string;
     email: string;
+    phone: string;
     roles: Role[];
 }
 
@@ -33,6 +34,7 @@ export default function Edit({ user, roles }: Props) {
     const { data, setData, put, processing, errors } = useForm({
         name: user.name || '',
         email: user.email || '',
+        phone: user.phone || '',
         password: '',
         password_confirmation: '',
         roles: user.roles.map(r => r.id) || [] as string[],
@@ -55,7 +57,7 @@ export default function Edit({ user, roles }: Props) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`Edit User: ${user.name}`} />
-            <div className="max-w-4xl p-6">
+            <div className="max-w-6xl p-6">
                 <form onSubmit={handleSubmit} className="space-y-8">
                     <div className="bg-white dark:bg-[#161615] p-8 rounded-2xl border border-[#19140015] dark:border-[#3E3E3A] space-y-6">
                         <div className="flex items-center justify-between">
@@ -69,10 +71,14 @@ export default function Edit({ user, roles }: Props) {
                                     <Mail className="h-3 w-3" />
                                     <span>{user.email}</span>
                                 </div>
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                    <Phone className="h-3 w-3" />
+                                    <span>{user.phone}</span>
+                                </div>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-[#19140015] dark:border-[#3E3E3A]">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-[#19140015] dark:border-[#3E3E3A]">
                             <div className="space-y-2">
                                 <Label htmlFor="name">Full Name</Label>
                                 <Input
@@ -92,6 +98,16 @@ export default function Edit({ user, roles }: Props) {
                                     onChange={(e) => setData('email', e.target.value)}
                                 />
                                 {errors.email && <p className="text-red-500 text-xs">{errors.email}</p>}
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="phone">Phone Number</Label>
+                                <Input
+                                    id="phone"
+                                    type="tel"
+                                    value={data.phone}
+                                    onChange={(e) => setData('phone', e.target.value)}
+                                />
+                                {errors.phone && <p className="text-red-500 text-xs">{errors.phone}</p>}
                             </div>
                         </div>
 
@@ -139,8 +155,8 @@ export default function Edit({ user, roles }: Props) {
                                     <label
                                         key={role.id}
                                         className={`flex items-start gap-3 p-4 rounded-xl border transition-all cursor-pointer ${data.roles.includes(role.id)
-                                                ? 'bg-blue-50/50 border-blue-500 dark:bg-blue-900/10'
-                                                : 'bg-transparent border-[#19140015] dark:border-[#3E3E3A] hover:bg-gray-50 dark:hover:bg-[#1C1C1A]'
+                                            ? 'bg-blue-50/50 border-blue-500 dark:bg-blue-900/10'
+                                            : 'bg-transparent border-[#19140015] dark:border-[#3E3E3A] hover:bg-gray-50 dark:hover:bg-[#1C1C1A]'
                                             }`}
                                     >
                                         <input

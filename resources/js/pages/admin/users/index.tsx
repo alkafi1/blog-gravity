@@ -27,6 +27,7 @@ interface User {
     id: string;
     name: string;
     email: string;
+    phone: string;
     roles: Role[];
 }
 
@@ -79,6 +80,7 @@ export default function Index({ users }: Props) {
                 <div className="flex flex-col">
                     <span className="font-bold">{row.name}</span>
                     <span className="text-xs text-muted-foreground">{row.email}</span>
+                    <span className="text-xs text-muted-foreground">{row.phone}</span>
                 </div>
             )
         },
