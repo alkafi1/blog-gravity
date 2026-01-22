@@ -99,7 +99,7 @@ export default function Index({ users }: Props) {
         {
             header: 'Actions',
             accessorKey: 'id',
-            align: 'center',
+            align: 'center' as const,
             cell: (row: User) => (
                 <div className="flex items-center gap-2">
                     {canUpdate && (

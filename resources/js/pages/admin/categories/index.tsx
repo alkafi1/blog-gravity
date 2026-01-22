@@ -99,7 +99,7 @@ export default function Index({ categories }: Props) {
         {
             header: 'Actions',
             accessorKey: 'id',
-            align: 'center',
+            align: 'center' as const,
             cell: (row: Category) => (
                 <div className="flex items-center gap-2">
                     <Button
