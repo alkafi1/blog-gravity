@@ -13,16 +13,35 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import {
+    DropdownMenu,
+    DropdownMenuCheckboxItem,
+    DropdownMenuContent,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Search, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import {
+    ChevronLeft,
+    ChevronRight,
+    ChevronsLeft,
+    ChevronsRight,
+    Search,
+    ArrowUpDown,
+    ArrowUp,
+    ArrowDown,
+    RotateCcw,
+    Settings2
+} from 'lucide-react';
 import { useState, useMemo } from 'react';
+import { router } from '@inertiajs/react';
 
 export interface Column<T> {
     header: string;
     accessorKey: keyof T | string;
     cell?: (item: T) => React.ReactNode;
     sortable?: boolean;
+    align?: 'left' | 'center' | 'right';
 }
 
 interface DataTableProps<T> {
@@ -41,10 +60,15 @@ export function DataTable<T extends { id: number | string }>({
     const [searchQuery, setSearchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(itemsPerPage);
+    const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>(
+        columns.reduce((acc, col) => ({ ...acc, [String(col.accessorKey)]: true }), {})
+    );
     const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' | null }>({
         key: '',
         direction: null,
     });
+
+    const activeColumns = columns.filter(col => visibleColumns[String(col.accessorKey)]);
 
     // Handle Sorting
     const handleSort = (key: string) => {
@@ -91,6 +115,10 @@ export function DataTable<T extends { id: number | string }>({
         currentPage * pageSize
     );
 
+    const handleRefresh = () => {
+        router.reload({ preserveScroll: true });
+    };
+
     return (
         <div className="space-y-4">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -105,25 +133,69 @@ export function DataTable<T extends { id: number | string }>({
                                     setSearchQuery(e.target.value);
                                     setCurrentPage(1);
                                 }}
-                                className="pl-8 w-full"
+                                className="pl-8 w-full h-9 bg-background"
                             />
                         </div>
                     )}
                 </div>
+                <div className="flex items-center gap-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-9 gap-2"
+                        onClick={handleRefresh}
+                    >
+                        <RotateCcw className="h-4 w-4" />
+                        <span className="hidden sm:inline">Refresh</span>
+                    </Button>
+
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm" className="ml-auto h-9 gap-2">
+                                <Settings2 className="h-4 w-4" />
+                                <span className="hidden sm:inline">Columns</span>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-[150px]">
+                            {columns.map((column) => (
+                                <DropdownMenuCheckboxItem
+                                    key={String(column.accessorKey)}
+                                    className="capitalize"
+                                    checked={visibleColumns[String(column.accessorKey)]}
+                                    onCheckedChange={(value) =>
+                                        setVisibleColumns((prev) => ({
+                                            ...prev,
+                                            [String(column.accessorKey)]: !!value,
+                                        }))
+                                    }
+                                >
+                                    {column.header}
+                                </DropdownMenuCheckboxItem>
+                            ))}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
             </div>
 
-            <div className="rounded-md border overflow-hidden">
+            <div className="rounded-md border bg-card text-card-foreground shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                     <Table>
                         <TableHeader>
-                            <TableRow>
-                                {columns.map((column) => (
-                                    <TableHead key={String(column.accessorKey)} className="whitespace-nowrap">
+                            <TableRow className="hover:bg-transparent">
+                                {activeColumns.map((column) => (
+                                    <TableHead
+                                        key={String(column.accessorKey)}
+                                        className={`whitespace-nowrap px-4 h-12 ${column.align === 'center' ? 'text-center' :
+                                            column.align === 'right' ? 'text-right' : 'text-left'
+                                            }`}
+                                    >
                                         {column.sortable ? (
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
-                                                className="-ml-3 h-8 data-[state=open]:bg-accent"
+                                                className={`-ml-3 h-8 data-[state=open]:bg-accent hover:bg-muted font-bold ${column.align === 'center' ? 'mx-auto' :
+                                                    column.align === 'right' ? 'ml-auto mr-0' : ''
+                                                    }`}
                                                 onClick={() => handleSort(String(column.accessorKey))}
                                             >
                                                 <span>{column.header}</span>
@@ -134,11 +206,11 @@ export function DataTable<T extends { id: number | string }>({
                                                         <ArrowDown className="ml-2 h-4 w-4" />
                                                     )
                                                 ) : (
-                                                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                                                    <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />
                                                 )}
                                             </Button>
                                         ) : (
-                                            column.header
+                                            <span className="font-bold">{column.header}</span>
                                         )}
                                     </TableHead>
                                 ))}
@@ -147,18 +219,27 @@ export function DataTable<T extends { id: number | string }>({
                         <TableBody>
                             {paginatedData.length > 0 ? (
                                 paginatedData.map((item) => (
-                                    <TableRow key={item.id}>
-                                        {columns.map((column) => (
-                                            <TableCell key={String(column.accessorKey)} className="whitespace-nowrap">
-                                                {column.cell ? column.cell(item) : String(item[column.accessorKey as keyof T] || '')}
+                                    <TableRow key={item.id} className="hover:bg-muted/50 transition-colors">
+                                        {activeColumns.map((column) => (
+                                            <TableCell
+                                                key={String(column.accessorKey)}
+                                                className={`px-4 py-3 ${column.align === 'center' ? 'text-center' :
+                                                    column.align === 'right' ? 'text-right' : 'text-left'
+                                                    }`}
+                                            >
+                                                <div className={`flex ${column.align === 'center' ? 'justify-center' :
+                                                    column.align === 'right' ? 'justify-end' : 'justify-start'
+                                                    }`}>
+                                                    {column.cell ? column.cell(item) : String(item[column.accessorKey as keyof T] || '')}
+                                                </div>
                                             </TableCell>
                                         ))}
                                     </TableRow>
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={columns.length} className="h-24 text-center">
-                                        No results.
+                                    <TableCell colSpan={activeColumns.length} className="h-24 text-center text-muted-foreground">
+                                        No results found.
                                     </TableCell>
                                 </TableRow>
                             )}
@@ -169,9 +250,9 @@ export function DataTable<T extends { id: number | string }>({
 
             <div className="flex flex-col sm:flex-row items-center justify-between px-2 gap-4">
                 <div className="text-sm text-muted-foreground order-2 sm:order-1">
-                    Showing {Math.min(filteredAndSortedData.length, (currentPage - 1) * pageSize + 1)} to{' '}
-                    {Math.min(filteredAndSortedData.length, currentPage * pageSize)} of{' '}
-                    {filteredAndSortedData.length} entries
+                    Showing <span className="font-medium">{Math.min(filteredAndSortedData.length, (currentPage - 1) * pageSize + 1)}</span> to{' '}
+                    <span className="font-medium">{Math.min(filteredAndSortedData.length, currentPage * pageSize)}</span> of{' '}
+                    <span className="font-medium">{filteredAndSortedData.length}</span> entries
                 </div>
                 <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6 lg:space-x-8 order-1 sm:order-2 w-full sm:w-auto">
                     <div className="flex items-center space-x-2">

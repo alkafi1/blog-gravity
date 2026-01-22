@@ -1,0 +1,52 @@
+<?php
+
+namespace Modules\Role\Policies;
+
+use Modules\User\Models\User;
+use Modules\Role\Models\Role;
+use Illuminate\Auth\Access\HandlesAuthorization;
+
+class RolePolicy
+{
+    use HandlesAuthorization;
+
+    /**
+     * Determine whether the user can view any models.
+     */
+    public function viewAny(User $user): bool
+    {
+        return $user->hasPermission('roles.view');
+    }
+
+    /**
+     * Determine whether the user can view the model.
+     */
+    public function view(User $user, Role $role): bool
+    {
+        return $user->hasPermission('roles.view');
+    }
+
+    /**
+     * Determine whether the user can create models.
+     */
+    public function create(User $user): bool
+    {
+        return $user->hasPermission('roles.create');
+    }
+
+    /**
+     * Determine whether the user can update the model.
+     */
+    public function update(User $user, Role $role): bool
+    {
+        return $user->hasPermission('roles.update');
+    }
+
+    /**
+     * Determine whether the user can delete the model.
+     */
+    public function delete(User $user, Role $role): bool
+    {
+        return $user->hasPermission('roles.delete');
+    }
+}

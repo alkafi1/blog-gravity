@@ -16,6 +16,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { useCan } from '@/hooks/use-can';
 
 interface Post {
     id: string;
@@ -44,6 +45,10 @@ export default function Index({ posts }: Props) {
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [selectedPost, setSelectedPost] = useState<Post | null>(null);
 
+    const canCreate = useCan('posts.create');
+    const canUpdate = useCan('posts.update') || useCan('posts.update.all');
+    const canDelete = useCan('posts.delete') || useCan('posts.delete.all');
+
     useEffect(() => {
         if (flash.success) {
             toast.success(flash.success);
@@ -71,25 +76,26 @@ export default function Index({ posts }: Props) {
             header: 'Title',
             accessorKey: 'title',
             sortable: true,
-            cell: (row) => <span className="font-bold">{row.title}</span>
+            cell: (row: Post) => <span className="font-bold">{row.title}</span>
         },
         {
             header: 'Category',
             accessorKey: 'category.name',
             sortable: true,
-            cell: (row) => <span className="text-sm opacity-80">{row.category?.name || 'Uncategorized'}</span>
+            cell: (row: Post) => <span className="text-sm opacity-80">{row.category?.name || 'Uncategorized'}</span>
         },
         {
             header: 'Author',
             accessorKey: 'user.name',
             sortable: true,
-            cell: (row) => <span className="text-sm opacity-60">{row.user?.name}</span>
+            cell: (row: Post) => <span className="text-sm opacity-60">{row.user?.name}</span>
         },
         {
             header: 'Status',
             accessorKey: 'status',
             sortable: true,
-            cell: (row) => {
+            align: 'center' as const,
+            cell: (row: Post) => {
                 const colors: Record<string, string> = {
                     published: 'bg-green-100 text-green-700',
                     draft: 'bg-gray-100 text-gray-700',
@@ -108,7 +114,8 @@ export default function Index({ posts }: Props) {
             header: 'Stats',
             accessorKey: 'reads',
             sortable: true,
-            cell: (row) => (
+            align: 'center' as const,
+            cell: (row: Post) => (
                 <div className="flex items-center gap-3 text-[10px] font-bold text-muted-foreground uppercase tracking-tighter">
                     <span title="Reads">{row.reads} R</span>
                     <span title="Likes">{row.likes} L</span>
@@ -119,8 +126,9 @@ export default function Index({ posts }: Props) {
         {
             header: 'Actions',
             accessorKey: 'id',
-            cell: (row) => (
-                <div className="flex items-center justify-end gap-2">
+            align: 'center' as const,
+            cell: (row: Post) => (
+                <div className="flex items-center gap-2">
                     <Button
                         variant="ghost"
                         size="icon"
@@ -131,28 +139,32 @@ export default function Index({ posts }: Props) {
                             <Eye className="h-4 w-4" />
                         </Link>
                     </Button>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50"
-                        asChild
-                    >
-                        <Link href={`/admin/posts/${row.id}/edit`}>
-                            <Pencil className="h-4 w-4" />
-                        </Link>
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
-                        onClick={() => openDeleteDialog(row)}
-                    >
-                        <Trash2 className="h-4 w-4" />
-                    </Button>
+                    {canUpdate && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+                            asChild
+                        >
+                            <Link href={`/admin/posts/${row.id}/edit`}>
+                                <Pencil className="h-4 w-4" />
+                            </Link>
+                        </Button>
+                    )}
+                    {canDelete && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                            onClick={() => openDeleteDialog(row)}
+                        >
+                            <Trash2 className="h-4 w-4" />
+                        </Button>
+                    )}
                 </div>
             )
         }
-    ];
+    ].filter(col => col.header !== 'Actions' || (canUpdate || canDelete));
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -164,12 +176,14 @@ export default function Index({ posts }: Props) {
                         <h1 className="text-2xl font-bold tracking-tight">Blog Posts</h1>
                         <p className="text-sm text-muted-foreground">Manage your articles and publications.</p>
                     </div>
-                    <Button asChild className="gap-2">
-                        <Link href="/admin/posts/create">
-                            <Plus className="h-4 w-4" />
-                            Create Post
-                        </Link>
-                    </Button>
+                    {canCreate && (
+                        <Button asChild className="gap-2">
+                            <Link href="/admin/posts/create">
+                                <Plus className="h-4 w-4" />
+                                Create Post
+                            </Link>
+                        </Button>
+                    )}
                 </div>
 
                 <div className="grid gap-4">

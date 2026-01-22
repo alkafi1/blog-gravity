@@ -12,6 +12,7 @@ use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
 use Laravel\Fortify\Fortify;
+use Illuminate\Validation\ValidationException;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -40,6 +41,48 @@ class FortifyServiceProvider extends ServiceProvider
     {
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
         Fortify::createUsersUsing(CreateNewUser::class);
+
+        Fortify::authenticateUsing(function (Request $request) {
+            $login = $request->email;
+
+            // Determine input type
+            $isNumeric = is_numeric($login);
+
+            // 1. Strict Phone Validation (Start with 01, 11 digits)
+            if ($isNumeric) {
+                if (!preg_match('/^01\d{9}$/', $login)) {
+                    throw ValidationException::withMessages([
+                        'email' => ['Invalid phone number format. It must start with 01 and be 11 digits long.'],
+                    ]);
+                }
+            }
+
+            $user = null;
+
+            if ($isNumeric) {
+                $user = \Modules\User\Models\User::where('phone', $login)->first();
+            } else {
+                $user = \Modules\User\Models\User::where('email', $login)->first();
+            }
+
+            // 2. User Not Found Check
+            if (!$user) {
+                throw ValidationException::withMessages([
+                    'email' => [$isNumeric
+                        ? 'We could not find an account with this phone number.'
+                        : 'We could not find an account with this email address.'],
+                ]);
+            }
+
+            // 3. Incorrect Password Check
+            if (!\Illuminate\Support\Facades\Hash::check($request->password, $user->password)) {
+                throw ValidationException::withMessages([
+                    'password' => ['The password you entered is incorrect.'],
+                ]);
+            }
+
+            return $user;
+        });
     }
 
     /**

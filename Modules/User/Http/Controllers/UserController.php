@@ -2,21 +2,28 @@
 
 namespace Modules\User\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Controllers\AdminResourceController;
+use Modules\User\Http\Requests\StoreUserRequest;
+use Modules\User\Http\Requests\UpdateUserRequest;
 use Modules\User\Models\User;
 use Modules\Role\Models\Role;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules;
 
-class UserController extends Controller
+use Modules\User\Http\Resources\UserResource;
+
+class UserController extends AdminResourceController
 {
+    public function __construct()
+    {
+        $this->authorizeResource(User::class, 'user');
+    }
+
     public function index()
     {
         $users = User::with('roles')->latest()->get();
         return Inertia::render('admin/users/index', [
-            'users' => $users
+            'users' => UserResource::collection($users)->resolve()
         ]);
     }
 
@@ -28,23 +35,13 @@ class UserController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreUserRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'roles' => 'required|array|min:1',
-            'roles.*' => 'exists:roles,id',
-        ]);
+        $user = User::create($request->validated());
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
-
-        $user->roles()->sync($request->roles);
+        if ($request->has('roles')) {
+            $user->roles()->sync($request->roles);
+        }
 
         return redirect()->route('admin.users.index')->with('success', 'User created successfully.');
     }
@@ -54,33 +51,24 @@ class UserController extends Controller
         $user->load('roles');
         $roles = Role::all();
         return Inertia::render('admin/users/edit', [
-            'user' => $user,
+            'user' => (new UserResource($user))->resolve(),
             'roles' => $roles
         ]);
     }
 
-    public function update(Request $request, User $user)
+    public function update(UpdateUserRequest $request, User $user)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
-            'roles' => 'required|array|min:1',
-            'roles.*' => 'exists:roles,id',
-        ]);
+        $validated = $request->validated();
 
-        $user->update([
-            'name' => $request->name,
-            'email' => $request->email,
-        ]);
-
-        if ($request->password) {
-            $user->update([
-                'password' => Hash::make($request->password),
-            ]);
+        if (empty($validated['password'])) {
+            unset($validated['password']);
         }
 
-        $user->roles()->sync($request->roles);
+        $user->update($validated);
+
+        if ($request->has('roles')) {
+            $user->roles()->sync($request->roles);
+        }
 
         return redirect()->route('admin.users.index')->with('success', 'User updated successfully.');
     }

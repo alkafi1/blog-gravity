@@ -36,6 +36,9 @@ class Post extends Model
         'shares' => 'integer',
         'likes' => 'integer',
         'reads' => 'integer',
+        'featured_image' => \App\Casts\StorageUrl::class,
+        'thumbnail_image' => \App\Casts\StorageUrl::class,
+        'share_image' => \App\Casts\StorageUrl::class,
     ];
 
     public function category()

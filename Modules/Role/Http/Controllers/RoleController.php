@@ -2,19 +2,27 @@
 
 namespace Modules\Role\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Controllers\AdminResourceController;
+use Modules\Role\Http\Requests\StoreRoleRequest;
+use Modules\Role\Http\Requests\UpdateRoleRequest;
 use Modules\Role\Models\Role;
 use Modules\Role\Models\Permission;
 use Inertia\Inertia;
 
-class RoleController extends Controller
+use Modules\Role\Http\Resources\RoleResource;
+
+class RoleController extends AdminResourceController
 {
+    public function __construct()
+    {
+        $this->authorizeResource(Role::class, 'role');
+    }
+
     public function index()
     {
         $roles = Role::with('permissions')->get();
         return Inertia::render('admin/roles/index', [
-            'roles' => $roles
+            'roles' => RoleResource::collection($roles)->resolve()
         ]);
     }
 
@@ -26,16 +34,9 @@ class RoleController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreRoleRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'slug' => 'required|string|unique:roles,slug',
-            'description' => 'nullable|string',
-            'permissions' => 'array'
-        ]);
-
-        $role = Role::create($validated);
+        $role = Role::create($request->validated());
         if ($request->has('permissions')) {
             $role->permissions()->sync($request->permissions);
         }
@@ -49,21 +50,14 @@ class RoleController extends Controller
         $permissionsByGroup = Permission::all()->groupBy('group');
 
         return Inertia::render('admin/roles/edit', [
-            'role' => $role,
+            'role' => (new RoleResource($role))->resolve(),
             'permissionsByGroup' => $permissionsByGroup
         ]);
     }
 
-    public function update(Request $request, Role $role)
+    public function update(UpdateRoleRequest $request, Role $role)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'slug' => 'required|string|unique:roles,slug,' . $role->id,
-            'description' => 'nullable|string',
-            'permissions' => 'array'
-        ]);
-
-        $role->update($validated);
+        $role->update($request->validated());
         $role->permissions()->sync($request->input('permissions', []));
 
         return redirect()->route('admin.roles.index')->with('success', 'Role updated successfully.');

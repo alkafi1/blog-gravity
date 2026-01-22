@@ -40,6 +40,11 @@ class HandleInertiaRequests extends Middleware
             'name' => config('app.name'),
             'auth' => [
                 'user' => $request->user(),
+                'permissions' => $request->user()
+                    ? ($request->user()->hasRole('super-admin')
+                        ? ['*']
+                        : $request->user()->roles()->with('permissions')->get()->flatMap->permissions->pluck('name')->unique()->values()->all())
+                    : [],
             ],
             'flash' => [
                 'success' => $request->session()->get('success'),
