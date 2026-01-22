@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RoleSeeder::class,
             CategorySeeder::class,
+            \Modules\Subcategory\Database\Seeders\SubcategorySeeder::class,
         ]);
 
         // Create Super Admin

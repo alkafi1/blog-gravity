@@ -11,8 +11,15 @@ interface Category {
     name: string;
 }
 
+interface Subcategory {
+    id: string;
+    name: string;
+    category_id: string;
+}
+
 interface Props {
     categories: Category[];
+    subcategories: Subcategory[];
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -21,18 +28,21 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Create', href: '/admin/posts/create' },
 ];
 
-export default function Create({ categories }: Props) {
+export default function Create({ categories, subcategories }: Props) {
     const { data, setData, post, processing, errors } = useForm({
         title: '',
         slug: '',
         content: '',
         category_id: '',
+        subcategory_id: '',
         layout_type: 1,
         featured_image: null as File | null,
         thumbnail_image: null as File | null,
         share_image: null as File | null,
         status: 'draft',
     });
+
+    const filteredSubcategories = subcategories.filter(sub => sub.category_id === data.category_id);
 
     const [previews, setPreviews] = useState<{ featured: string | null; thumb: string | null; share: string | null }>({
         featured: null,
@@ -89,20 +99,41 @@ export default function Create({ categories }: Props) {
                             {errors.slug && <p className="text-red-500 text-xs mt-1">{errors.slug}</p>}
                         </div>
 
-                        <div>
-                            <Label htmlFor="category">Category</Label>
-                            <select
-                                id="category"
-                                value={data.category_id}
-                                onChange={(e) => setData('category_id', e.target.value)}
-                                className="w-full mt-1 rounded-md border border-[#19140015] dark:border-[#3E3E3A] bg-transparent p-2"
-                            >
-                                <option value="">Select Category</option>
-                                {categories.map((cat) => (
-                                    <option key={cat.id} value={cat.id}>{cat.name}</option>
-                                ))}
-                            </select>
-                            {errors.category_id && <p className="text-red-500 text-xs mt-1">{errors.category_id}</p>}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <Label htmlFor="category">Category</Label>
+                                <select
+                                    id="category"
+                                    value={data.category_id}
+                                    onChange={(e) => {
+                                        setData(prev => ({ ...prev, category_id: e.target.value, subcategory_id: '' }));
+                                    }}
+                                    className="w-full mt-1 rounded-md border border-[#19140015] dark:border-[#3E3E3A] bg-transparent p-2"
+                                >
+                                    <option value="">Select Category</option>
+                                    {categories.map((cat) => (
+                                        <option key={cat.id} value={cat.id}>{cat.name}</option>
+                                    ))}
+                                </select>
+                                {errors.category_id && <p className="text-red-500 text-xs mt-1">{errors.category_id}</p>}
+                            </div>
+
+                            <div>
+                                <Label htmlFor="subcategory">Subcategory</Label>
+                                <select
+                                    id="subcategory"
+                                    value={data.subcategory_id}
+                                    onChange={(e) => setData('subcategory_id', e.target.value)}
+                                    className="w-full mt-1 rounded-md border border-[#19140015] dark:border-[#3E3E3A] bg-transparent p-2"
+                                    disabled={!data.category_id}
+                                >
+                                    <option value="">Select Subcategory</option>
+                                    {filteredSubcategories.map((sub) => (
+                                        <option key={sub.id} value={sub.id}>{sub.name}</option>
+                                    ))}
+                                </select>
+                                {errors.subcategory_id && <p className="text-red-500 text-xs mt-1">{errors.subcategory_id}</p>}
+                            </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-6">

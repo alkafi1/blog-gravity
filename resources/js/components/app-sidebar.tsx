@@ -42,6 +42,12 @@ const mainNavItems: NavItem[] = [
         permission: 'categories.view',
     },
     {
+        title: 'Subcategories',
+        href: '/admin/subcategories',
+        icon: Folder,
+        permission: 'subcategories.view',
+    },
+    {
         title: 'Posts',
         href: '/admin/posts',
         icon: FileText,

@@ -31,6 +31,15 @@ export interface SharedData {
         success: string | null;
         error: string | null;
     };
+    stats: {
+        users: number;
+        categories: number;
+        posts: {
+            total: number;
+            published: number;
+            drafts: number;
+        };
+    } | null;
     sidebarOpen: boolean;
     [key: string]: unknown;
 }
@@ -49,18 +58,28 @@ export interface User {
 }
 
 export interface Category {
-    id: number;
+    id: string | number;
     name: string;
     slug: string;
 }
 
+export interface Subcategory {
+    id: string | number;
+    name: string;
+    slug: string;
+    category_id: string | number;
+    category?: Category;
+}
+
 export interface Post {
-    id: number;
+    id: string | number;
     title: string;
     slug: string;
     content: string;
     layout_type: number;
+    status: 'published' | 'draft' | 'pending' | 'rejected' | 'watch';
     category?: Category;
+    subcategory?: Subcategory;
     user?: User;
     published_at: string;
     featured_image?: string;

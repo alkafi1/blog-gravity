@@ -14,10 +14,14 @@ class CategorySeeder extends Seeder
     public function run(): void
     {
         $mainCategories = [
-            'Technology', 'Health & Lifestyle', 'Business', 'Sports', 'Entertainment',
-            'Education', 'Politics', 'Science', 'Travel', 'Food', 'Fashion', 'Art',
-            'Environment', 'History', 'Philosophy', 'Photography', 'Music', 'Movies',
-            'Gaming', 'Finance'
+            'Artificial Intelligence',
+            'Web Development',
+            'DevOps & Infrastructure',
+            'Mobile Development',
+            'Cybersecurity',
+            'Cloud Computing',
+            'Data Science',
+            'Blockchain'
         ];
 
         foreach ($mainCategories as $name) {

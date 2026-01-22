@@ -67,6 +67,9 @@ class User extends Authenticatable
 
     public function hasPermission($permission)
     {
+        if ($this->hasRole('super-admin')) {
+            return true;
+        }
         return $this->roles->flatMap->permissions->pluck('name')->contains($permission);
     }
 }

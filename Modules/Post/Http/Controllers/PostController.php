@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Auth;
 
 use Modules\Post\Http\Resources\PostResource;
+use App\Http\Resources\SelectListResource;
+use Modules\Subcategory\Models\Subcategory;
 
 class PostController extends AdminResourceController
 {
@@ -23,17 +25,26 @@ class PostController extends AdminResourceController
 
     public function index()
     {
-        $posts = Post::with(['category', 'user'])->latest()->get();
+        $posts = Post::with(['category', 'subcategory', 'user'])->latest()->get();
+        $categories = Category::all();
+        $subcategories = Subcategory::all();
+        $authors = \Modules\User\Models\User::all();
+
         return Inertia::render('admin/posts/index', [
-            'posts' => PostResource::collection($posts)->resolve()
+            'posts' => PostResource::collection($posts)->resolve(),
+            'categories' => SelectListResource::collection($categories)->resolve(),
+            'subcategories' => SelectListResource::collection($subcategories)->resolve(),
+            'authors' => \Modules\User\Http\Resources\UserResource::collection($authors)->resolve(),
         ]);
     }
 
     public function create()
     {
         $categories = Category::all();
+        $subcategories = Subcategory::all();
         return Inertia::render('admin/posts/create', [
-            'categories' => $categories
+            'categories' => SelectListResource::collection($categories)->resolve(),
+            'subcategories' => SelectListResource::collection($subcategories)->resolve(),
         ]);
     }
 
@@ -72,9 +83,11 @@ class PostController extends AdminResourceController
     public function edit(Post $post)
     {
         $categories = Category::all();
+        $subcategories = Subcategory::all();
         return Inertia::render('admin/posts/edit', [
             'post' => (new PostResource($post))->resolve(),
-            'categories' => $categories
+            'categories' => SelectListResource::collection($categories)->resolve(),
+            'subcategories' => SelectListResource::collection($subcategories)->resolve(),
         ]);
     }
 

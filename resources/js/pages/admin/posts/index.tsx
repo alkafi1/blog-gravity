@@ -1,6 +1,6 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem, type SharedData } from '@/types';
+import { type BreadcrumbItem, type SharedData, type Post, type Category, type Subcategory, type User } from '@/types';
 import { Button } from '@/components/ui/button';
 import { DataTable, type Column } from '@/components/DataTable';
 import { useEffect, useState } from 'react';
@@ -18,21 +18,11 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useCan } from '@/hooks/use-can';
 
-interface Post {
-    id: string;
-    title: string;
-    slug: string;
-    category?: { name: string };
-    user?: { name: string };
-    status: string;
-    shares: number;
-    likes: number;
-    reads: number;
-    thumbnail_image?: string;
-}
-
 interface Props {
     posts: Post[];
+    categories: Category[];
+    subcategories: Subcategory[];
+    authors: User[];
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -40,7 +30,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Posts', href: '/admin/posts' },
 ];
 
-export default function Index({ posts }: Props) {
+export default function Index({ posts, categories, subcategories, authors }: Props) {
     const { flash } = usePage<SharedData>().props;
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [selectedPost, setSelectedPost] = useState<Post | null>(null);
@@ -82,7 +72,14 @@ export default function Index({ posts }: Props) {
             header: 'Category',
             accessorKey: 'category.name',
             sortable: true,
-            cell: (row: Post) => <span className="text-sm opacity-80">{row.category?.name || 'Uncategorized'}</span>
+            cell: (row: Post) => (
+                <div className="flex flex-col">
+                    <span className="text-sm opacity-80">{row.category?.name || 'Uncategorized'}</span>
+                    {row.subcategory && (
+                        <span className="text-[10px] text-muted-foreground">{row.subcategory.name}</span>
+                    )}
+                </div>
+            )
         },
         {
             header: 'Author',
@@ -166,6 +163,35 @@ export default function Index({ posts }: Props) {
         }
     ].filter(col => col.header !== 'Actions' || (canUpdate || canDelete));
 
+    const filters = [
+        {
+            key: 'category.id',
+            label: 'Category',
+            options: categories.map(c => ({ label: c.name, value: c.id }))
+        },
+        {
+            key: 'subcategory.id',
+            label: 'Subcategory',
+            options: subcategories.map(s => ({ label: s.name, value: s.id }))
+        },
+        {
+            key: 'user.id',
+            label: 'Author',
+            options: authors.map(a => ({ label: a.name, value: a.id }))
+        },
+        {
+            key: 'status',
+            label: 'Status',
+            options: [
+                { label: 'Published', value: 'published' },
+                { label: 'Draft', value: 'draft' },
+                { label: 'Pending', value: 'pending' },
+                { label: 'Rejected', value: 'rejected' },
+                { label: 'Watch', value: 'watch' },
+            ]
+        }
+    ];
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Posts Management" />
@@ -190,7 +216,8 @@ export default function Index({ posts }: Props) {
                     <DataTable
                         data={posts}
                         columns={columns}
-                        searchKey="title"
+                        searchKey={['title', 'category.name', 'subcategory.name', 'user.name']}
+                        filters={filters}
                     />
                 </div>
             </div>

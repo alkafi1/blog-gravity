@@ -13,6 +13,7 @@ return [
     'permission_groups' => [
         'users' => ['view', 'create', 'update', 'delete'],
         'categories' => ['view', 'create', 'update', 'delete'],
+        'subcategories' => ['view', 'create', 'update', 'delete'],
         'posts' => ['view', 'create', 'update', 'update.all', 'delete', 'delete.all', 'publish'],
         'roles' => ['view', 'create', 'update', 'delete'],
     ],
@@ -40,6 +41,7 @@ return [
             'permissions' => [
                 'users.view', 'users.create', 'users.update',
                 'categories.view', 'categories.create', 'categories.update', 'categories.delete',
+                'subcategories.view', 'subcategories.create', 'subcategories.update', 'subcategories.delete',
                 'posts.view', 'posts.create', 'posts.update.all', 'posts.delete.all', 'posts.publish',
             ],
         ],

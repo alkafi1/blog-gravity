@@ -17,6 +17,8 @@ use Modules\Role\Models\Role;
 use Modules\Role\Policies\RolePolicy;
 use Modules\User\Models\User;
 use Modules\User\Policies\UserPolicy;
+use Modules\Subcategory\Models\Subcategory;
+use Modules\Subcategory\Policies\SubcategoryPolicy;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -38,6 +40,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Category::class, CategoryPolicy::class);
         Gate::policy(Role::class, RolePolicy::class);
         Gate::policy(User::class, UserPolicy::class);
+        Gate::policy(Subcategory::class, SubcategoryPolicy::class);
     }
 
     protected function configureDefaults(): void
